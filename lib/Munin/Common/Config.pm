@@ -123,6 +123,7 @@ my %legal = map { $_ => 1 } qw(
 	tls_verify_certificate
 	tls_verify_depth
 	tmpldir
+	transparency
 	trend
 	type
 	unknown

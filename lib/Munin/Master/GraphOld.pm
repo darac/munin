@@ -1148,6 +1148,16 @@ sub process_service {
 	# Select a default colour if no explicit one
 	$colour ||= ($single_value) ? $single_colour : $COLOUR[$field_count % @COLOUR];
 
+	# If a transparency is specified, apply it now
+	my $transparency = munin_get($field, "transparency");
+	my $transparencyalpha = "6F";	# default
+	if ($transparency){
+		# Transparency should be a number from 0 (fully opaque as before)
+		# to 100 (fully transparent). I think people understand percentages.
+		# RRD, however, wants this as an alpha value from FF (opaque) to 00.
+		my $transparencyalpha = sprintf "%02X", (255 * (100 - int($transparency)) / 100);
+	}
+
         # colour needed for transparent predictions and trends
         munin_set($field, "colour", $colour);
         $field_count++;
@@ -1160,7 +1170,7 @@ sub process_service {
 
        if ($fielddraw eq "AREA" || $fielddraw eq "STACK") {
 		my $fielddraw_overlay = ($fielddraw eq "STACK" ? "STACK" : "LINE.5");
-                push(@rrd, $fielddraw . ":g$rrdname" . "#$colour" ."6F"
+                push(@rrd, $fielddraw . ":g$rrdname" . "#$colour" . $transparencyalpha
 			. ":". escape($tmplabel)
 			. (" " x ($max_field_len + 1 - length $tmplabel))
 );
